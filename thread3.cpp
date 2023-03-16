@@ -12,11 +12,12 @@
 using namespace std;
 
 //метод с передачей информацией в поток
-void DoWork(int a, int b)
+void DoWork(int &c)
 {
 	cout << "start thread id=" << this_thread::get_id() << endl;
 	this_thread::sleep_for(chrono::milliseconds(8000)); //имитация долгих вычислений
-	cout << "a+b=" << a + b << endl;
+	c++;
+	cout << " c=" << c << endl;
 	cout << "finish thread id=" << this_thread::get_id() << endl;
 }
 
@@ -26,13 +27,15 @@ int main()
 
 	cout << "start main" << endl;
 
-	thread thread1(DoWork, 1, 2); // выполнение в новом потоке не в Name
-	thread thread2(DoWork, 3, 4); // выполнение в новом потоке не в Name
+	int x = 1;
+	// std::ref(x) создаёт класс обёртку для передачи ссылки в поток, без этого ошибка компилятора
+	thread thread1(DoWork, ref(x)); // выполнение в новом потоке не в Name
+//	thread thread2(DoWork, 3, 4); // выполнение в новом потоке не в Name
 	//thread1.detach(); // разъеденить потоки (или убираем detach и добавляем join внизу)
 
 	//DoWork(); // выполнение в одном потоке с main 
 
-	for (size_t i = 0; i < 100; i++)
+	for (size_t i = 0; i < 20; i++)
 	{
 		cout << "id потока Main = " << this_thread::get_id() << " i=" << i << endl;
 		this_thread::sleep_for(chrono::milliseconds(500));
@@ -41,7 +44,8 @@ int main()
 	cout << "ждём когда закончит работать поток thread1" << endl;
 	//ожидание когда закончит работу поток thread1
 	thread1.join();
-	thread2.join();
+	cout << "x=" << x << endl;
+//	thread2.join();
 
 	std::cout << "finish\n";
 }
